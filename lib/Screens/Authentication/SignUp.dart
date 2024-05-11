@@ -1,21 +1,59 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_local_variable
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:tailorcraft/Screens/Authentication/SignIn.dart';
 
+import '../../API/api.dart';
 import '../../ReusableWidgets/AuthReusable/AuthReusable.dart';
 import '../../ReusableWidgets/AuthReusable/Button.dart';
 import '../../ReusableWidgets/FontStyle.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
+
+  var isLoading = false;
+
+  void signUpUser() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var data = {
+        "firstName": usernameController.text,
+        "email": emailController.text,
+        "password": passwordController.text,
+      };
+
+      print(" sending dataaaa");
+      print(data);
+      print(" sending dataaaa");
+      var res = await CallApi().postData(data, 'api/auth');
+      var body = json.decode(res.body);
+      setState(() {
+        isLoading = false;
+      });
+      Get.snackbar("Success", "Successfully Created");
+      Get.to(SignInScreen());
+
+      print(body);
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,15 +118,20 @@ class SignUpScreen extends StatelessWidget {
                             value!.isEmpty ? "Password can't be empty" : null,
                       ),
                       SizedBox(height: screenHeight * 0.05),
-                      CustomElevatedButton(
-                        onPressed: () {
-                          //Validator
-                          if (_formKey.currentState!.validate()) {
-                            Get.snackbar("Success", "Successfully Created");
-                          }
-                        },
-                        label: 'SignUp',
-                      ),
+                      isLoading
+                          ? Center(
+                              child: CircularProgressIndicator.adaptive(
+                                value: 10,
+                              ),
+                            )
+                          : CustomElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  signUpUser();
+                                }
+                              },
+                              label: 'SignUp',
+                            ),
                       SizedBox(
                         height: screenHeight * 0.02,
                       ),
@@ -102,7 +145,7 @@ class SignUpScreen extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Get.to(SignInScreen());
+                              signUpUser();
                             },
                             child: Text(
                               "SignIn",

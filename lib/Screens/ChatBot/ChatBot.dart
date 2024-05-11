@@ -1,8 +1,21 @@
 // ignore_for_file: use_key_in_widget_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
-class ChatBotScreen extends StatelessWidget {
+import '../../API/api.dart';
+
+class ChatBotScreen extends StatefulWidget {
+  @override
+  State<ChatBotScreen> createState() => _ChatBotScreenState();
+}
+
+class _ChatBotScreenState extends State<ChatBotScreen> {
+  TextEditingController chatController = TextEditingController();
+
+  var sinhalaTranslatedText;
+
   final List<Map<String, dynamic>> _messages = [
     {'text': 'Hello! How can I help you?', 'isUserMessage': false},
   ];
@@ -37,7 +50,7 @@ class ChatBotScreen extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Text(
-          text,
+          sinhalaTranslatedText.toString() ?? "",
           style: TextStyle(
             color: isUserMessage ? Colors.white : Colors.black,
           ),
@@ -53,6 +66,7 @@ class ChatBotScreen extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
+              controller: chatController,
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 border: OutlineInputBorder(),
@@ -63,11 +77,31 @@ class ChatBotScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.send),
             onPressed: () {
+              translation();
               // Implement sending the message
             },
           ),
         ],
       ),
     );
+  }
+
+  void translation() async {
+    try {
+      var data = {
+        "text": chatController.text,
+      };
+
+      print(" sending dataaaa");
+      print(data);
+      print(" sending dataaaa");
+      var res = await CallApi().postData(data, 'translate/english-to-sinhala');
+      var body = json.decode(res.body);
+      setState(() {
+        sinhalaTranslatedText = body["translation"];
+      });
+
+      print(body['translation']);
+    } catch (e) {}
   }
 }

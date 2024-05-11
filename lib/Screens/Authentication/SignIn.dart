@@ -1,22 +1,67 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_local_variable
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tailorcraft/Screens/Authentication/SignUp.dart';
 import 'package:tailorcraft/Screens/BottomNavigation/BottomNavigation.dart';
+import 'package:tailorcraft/SharedPreferences/sharedPreference.dart';
 
+import '../../API/api.dart';
 import '../../ReusableWidgets/AuthReusable/AuthReusable.dart';
 import '../../ReusableWidgets/AuthReusable/Button.dart';
 import '../../ReusableWidgets/FontStyle.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
   SignInScreen({super.key});
 
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
+  var isLoading = false;
+  void signInUser() async {
+    final token = SharedPreferences.getInstance();
+
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var data = {
+        "email": emailController.text,
+        "password": passwordController.text,
+      };
+
+      print(" sending dataaaa");
+      print(data);
+      print(" sending dataaaa");
+      var res = await CallApi().postData(data, 'api/auth/login');
+      var body = json.decode(res.body);
+
+      setState(() {
+        isLoading = false;
+      });
+      Get.snackbar("Success", "Successfully Login");
+      print("token>>>>>>>>>>>>>>...");
+
+      print(body['token']);
+      MySharedPreferences.instance.setStringValue("token", body['token']);
+      Get.to(BottomNavigationScreen());
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,16 +120,19 @@ class SignInScreen extends StatelessWidget {
                           alignment: Alignment.topRight,
                           child: Text("Forget Password?")),
                       SizedBox(height: screenHeight * 0.05),
-                      CustomElevatedButton(
-                        onPressed: () {
-                          //Validator
-                          if (_formKey.currentState!.validate()) {
-                            Get.to(BottomNavigationScreen());
-                            Get.snackbar("Success", "Successfully Created");
-                          }
-                        },
-                        label: 'SignIn',
-                      ),
+                      isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                              value: 10,
+                            ))
+                          : CustomElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  signInUser();
+                                }
+                              },
+                              label: 'SignIn',
+                            ),
                       SizedBox(
                         height: screenHeight * 0.02,
                       ),

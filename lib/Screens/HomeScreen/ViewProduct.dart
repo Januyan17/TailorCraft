@@ -1,21 +1,62 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tailorcraft/API/api.dart';
 import 'package:tailorcraft/ReusableWidgets/AuthReusable/Button.dart';
+import 'package:tailorcraft/Screens/Payment/Payment.dart';
 import 'package:tailorcraft/Screens/Ratings/Ratings.dart';
 
 import '../../Classes/Product.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-
+import 'package:get_storage/get_storage.dart';
 import '../../GetXControllers/ProductController.dart';
 
-class ViewProduct extends StatelessWidget {
-  final Product product;
-  ViewProduct({Key? key, required this.product});
+class ViewProduct extends StatefulWidget {
+  final String image;
+  final String title;
+  ViewProduct({Key? key, required this.image, required this.title});
 
+  @override
+  State<ViewProduct> createState() => _ViewProductState();
+}
+
+class _ViewProductState extends State<ViewProduct> {
   final ProductController productController = Get.find();
+
+  var isLoading = false;
+  var productColor;
+
+  void AddData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var data = {
+        "title": widget.title,
+        "size": productController.selectedSize.value,
+        // "color": color,
+        "price": "60",
+      };
+
+      print(" sending dataaaa");
+      print(data);
+      print(" sending dataaaa");
+      var res = await CallApi().postData(data, 'api/post');
+      var body = json.decode(res.body);
+      setState(() {
+        isLoading = false;
+      });
+      Get.snackbar("Success", "Successfully added");
+      Get.to(PaymentScreen());
+
+      print(body);
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +76,40 @@ class ViewProduct extends StatelessWidget {
                 width: screenWidth,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20.0),
-                  child: Image.network(
-                    product.image,
+                  child: Image.memory(
+                    base64Decode(widget.image.toString()),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
               Text(
-                product.title,
+                widget.title.toString(),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              Row(
+                children: [
+                  Text(
+                    "Price   : ",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "100 £",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: screenHeight * 0.02),
               Text(
@@ -90,6 +155,8 @@ class ViewProduct extends StatelessWidget {
                     ? MaterialColorPicker(
                         onColorChange: (Color color) {
                           print(color);
+                          // GetStorage box = GetStorage();
+                          // box.write('color', color);
                           // Handle color changes
                         },
                         // selectedColor: Colors.red
@@ -154,6 +221,7 @@ class ViewProduct extends StatelessWidget {
               Center(
                   child: ElevatedButton(
                       onPressed: () {
+                        // Get.to(AddtoCard());
                         Get.to(CommentListScreen());
                       },
                       child: Text("Ratings"))),
@@ -161,7 +229,18 @@ class ViewProduct extends StatelessWidget {
               SizedBox(
                 height: screenHeight * 0.03,
               ),
-              CustomElevatedButton(onPressed: () {}, label: "Confirm Booking")
+
+              isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        value: 10,
+                      ),
+                    )
+                  : CustomElevatedButton(
+                      onPressed: () {
+                        AddData();
+                      },
+                      label: "Confirm")
             ],
           ),
         ),

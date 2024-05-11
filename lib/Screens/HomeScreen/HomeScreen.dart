@@ -1,16 +1,48 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable, sized_box_for_whitespace, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tailorcraft/API/api.dart';
 import 'package:tailorcraft/Screens/HomeScreen/ViewProduct.dart';
 import '../../Colors/Colors.dart';
 import '../../GetXControllers/ProductController.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   final ProductController productController = Get.put(ProductController());
+  var _isLoading = false;
+  List apiBody = [];
+  @override
+  void initState() {
+    getData();
+    super.initState();
+  }
+
+  getData() async {
+    // SharedPreferences localStorage = await SharedPreferences.getInstance();
+    // var userId = localStorage.getInt('id');
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      var res = await CallApi().getData('api/course');
+      apiBody = await json.decode(res.body);
+      print(apiBody);
+    } catch (error) {}
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +57,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Image.memory(base64Decode("")),
               Container(
                 width: screenWidth,
                 child: TextFormField(
@@ -61,16 +94,18 @@ class HomeScreen extends StatelessWidget {
                 height: screenHeight * 0.75,
                 width: screenWidth,
                 child: ListView.builder(
-                  itemCount: productController.products.length,
+                  itemCount: apiBody.length,
                   itemBuilder: (context, index) {
-                    final product = productController.products[index];
+                    // final product = productController.products[index];
                     return Container(
                       height: screenHeight * 0.4,
                       width: screenWidth,
                       child: GestureDetector(
                         onTap: () {
                           Get.to(ViewProduct(
-                              product: productController.products[index]));
+                            image: apiBody[index]["courseImage"],
+                            title: apiBody[index]["courseName"],
+                          ));
                         },
                         child: Card(
                           margin: EdgeInsets.all(8.0),
@@ -82,12 +117,19 @@ class HomeScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.0),
                             child: Column(
                               children: [
-                                Image.network(
-                                  product.image,
-                                  width: screenWidth,
-                                  height: screenHeight * 0.3,
-                                  fit: BoxFit.cover,
-                                ),
+                                Image.memory(
+                                    width: screenWidth,
+                                    height: screenHeight * 0.3,
+                                    fit: BoxFit.cover,
+                                    base64Decode(
+                                        apiBody[index]["courseImage"])),
+
+                                // Image.network(
+                                //   product.image,
+                                //   width: screenWidth,
+                                //   height: screenHeight * 0.3,
+                                //   fit: BoxFit.cover,
+                                // ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 5),
@@ -101,12 +143,12 @@ class HomeScreen extends StatelessWidget {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            product.title,
+                                            apiBody[index]["courseName"],
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            product.price.toString(),
+                                            100.toString(),
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -121,13 +163,14 @@ class HomeScreen extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(product.description),
+                                          Text(apiBody[index]
+                                              ["courseDescription"]),
                                           Row(
                                             children: [
                                               Icon(Icons.star,
                                                   color: Colors.yellow),
                                               Text(
-                                                product.rating.toString(),
+                                                5.toString(),
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
