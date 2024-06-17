@@ -35,7 +35,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
     try {
       var data = {
-        "firstName": usernameController.text,
+        "username": usernameController.text,
         "email": emailController.text,
         "password": passwordController.text,
       };
@@ -43,7 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       print(" sending dataaaa");
       print(data);
       print(" sending dataaaa");
-      var res = await CallApi().postData(data, 'api/auth');
+      var res = await CallApi().postData(data, 'api/register');
       var body = json.decode(res.body);
       setState(() {
         isLoading = false;
@@ -79,7 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Container(
                 height: screenHeight * 0.3,
                 width: screenWidth,
-                child: Image.asset("assets/images/boy1.png"),
+                child: Image.asset("assets/images/test.png"),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),

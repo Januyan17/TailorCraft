@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:tailorcraft/Colors/Colors.dart';
 import 'package:tailorcraft/Screens/Authentication/SignIn.dart';
-import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:newton_particles/newton_particles.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -100,34 +99,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   SizedBox(
                     height: screenHeight * 0.38,
                   ),
-                  SwipeButton.expand(
-                    thumb: Icon(
-                      Icons.double_arrow_rounded,
-                      color: Colors.white,
-                    ),
-                    child: Text(
-                      "Swipe to Get Started",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                      ),
-                    ),
-                    activeThumbColor: Colors.black,
-                    activeTrackColor: Colors.deepPurple,
-                    onSwipe: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignInScreen()),
-                      );
-
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   SnackBar(
-                      //     content: Text("Swipped"),
-                      //     backgroundColor: Colors.green,
-                      //   ),
-                      // );
-                    },
-                  )
                 ],
               ),
             )

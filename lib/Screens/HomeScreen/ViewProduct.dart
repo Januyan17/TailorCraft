@@ -1,20 +1,17 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tailorcraft/API/api.dart';
 import 'package:tailorcraft/ReusableWidgets/AuthReusable/Button.dart';
+import 'package:tailorcraft/Screens/HomeScreen/AddtoCart.dart';
 import 'package:tailorcraft/Screens/Payment/Payment.dart';
 import 'package:tailorcraft/Screens/Ratings/Ratings.dart';
-
 import '../../Classes/Product.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:get_storage/get_storage.dart';
 import '../../GetXControllers/ProductController.dart';
+import '../../GetXControllers/CartController.dart'; // Import CartController
 
 class ViewProduct extends StatefulWidget {
   final String image;
@@ -27,11 +24,18 @@ class ViewProduct extends StatefulWidget {
 
 class _ViewProductState extends State<ViewProduct> {
   final ProductController productController = Get.find();
+  final CartController cartController =
+      Get.put(CartController()); // Initialize CartController
 
   var isLoading = false;
   var productColor;
 
   void AddData() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var userId = localStorage.getString('userId');
+    print("UserIDDDDDDDDDDDDDDDDD");
+    print(userId);
+
     setState(() {
       isLoading = true;
     });
@@ -76,8 +80,8 @@ class _ViewProductState extends State<ViewProduct> {
                 width: screenWidth,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20.0),
-                  child: Image.memory(
-                    base64Decode(widget.image.toString()),
+                  child: Image.network(
+                    widget.image.toString(),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -163,73 +167,42 @@ class _ViewProductState extends State<ViewProduct> {
                       )
                     : SizedBox(),
               ),
-              SizedBox(height: screenHeight * 0.02),
-              Text(
-                'Select Size:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              Obx(() => Row(
-                    children: [
-                      Radio<String>(
-                        value: 'S',
-                        groupValue: productController.selectedSize.value,
-                        onChanged: (value) {
-                          productController.selectedSize.value = value!;
-                        },
-                      ),
-                      Text('S'),
-                      Radio<String>(
-                        value: 'M',
-                        groupValue: productController.selectedSize.value,
-                        onChanged: (value) {
-                          productController.selectedSize.value = value!;
-                        },
-                      ),
-                      Text('M'),
-                      Radio<String>(
-                        value: 'L',
-                        groupValue: productController.selectedSize.value,
-                        onChanged: (value) {
-                          productController.selectedSize.value = value!;
-                        },
-                      ),
-                      Text('L'),
-                      Radio<String>(
-                        value: 'XL',
-                        groupValue: productController.selectedSize.value,
-                        onChanged: (value) {
-                          productController.selectedSize.value = value!;
-                        },
-                      ),
-                      Text('XL'),
-                      Radio<String>(
-                        value: 'XXL',
-                        groupValue: productController.selectedSize.value,
-                        onChanged: (value) {
-                          productController.selectedSize.value = value!;
-                        },
-                      ),
-                      Text('XXL'),
-                    ],
-                  )),
-              SizedBox(
-                height: screenHeight * 0.02,
-              ),
               Center(
-                  child: ElevatedButton(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(
                       onPressed: () {
                         // Get.to(AddtoCard());
                         Get.to(CommentListScreen());
                       },
-                      child: Text("Ratings"))),
-              // CustomElevatedButton(onPressed: () {}, label: "Ratings"),
+                      child: Text("Ratings")),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.scanner),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        // Add the product to the cart
+                        var product = Product(
+                          title: widget.title,
+                          image: widget.image, description: 'hellooo',
+                          price: 100,
+                          rating: 4,
+                          // Add other product details
+                        );
+                        cartController.addToCart(product);
+
+                        // Navigate to the Cart List Page
+                        Get.to(CartListPage());
+                      },
+                      child: Text("Add To Cart")),
+                ],
+              )),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
-
               isLoading
                   ? Center(
                       child: CircularProgressIndicator(

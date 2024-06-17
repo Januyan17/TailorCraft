@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tailorcraft/API/api.dart';
+import 'package:tailorcraft/Screens/HomeScreen/AddtoCart.dart';
 import 'package:tailorcraft/Screens/HomeScreen/ViewProduct.dart';
 import '../../Colors/Colors.dart';
 import '../../GetXControllers/ProductController.dart';
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = true;
     });
     try {
-      var res = await CallApi().getData('api/course');
+      var res = await CallApi().getData('api/products');
       apiBody = await json.decode(res.body);
       print(apiBody);
     } catch (error) {}
@@ -49,6 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: () {
+              Get.to(CartListPage());
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
           child: SingleChildScrollView(
         child: Padding(
@@ -103,8 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: GestureDetector(
                         onTap: () {
                           Get.to(ViewProduct(
-                            image: apiBody[index]["courseImage"],
-                            title: apiBody[index]["courseName"],
+                            image: apiBody[index]["imageUrl"],
+                            title: apiBody[index]["title"],
                           ));
                         },
                         child: Card(
@@ -117,19 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(20.0),
                             child: Column(
                               children: [
-                                Image.memory(
-                                    width: screenWidth,
-                                    height: screenHeight * 0.3,
-                                    fit: BoxFit.cover,
-                                    base64Decode(
-                                        apiBody[index]["courseImage"])),
+                                // Image.memory(
+                                //     width: screenWidth,
+                                //     height: screenHeight * 0.3,
+                                //     fit: BoxFit.cover,
+                                //     base64Decode(
+                                //         apiBody[index]["courseImage"])),
 
-                                // Image.network(
-                                //   product.image,
-                                //   width: screenWidth,
-                                //   height: screenHeight * 0.3,
-                                //   fit: BoxFit.cover,
-                                // ),
+                                Image.network(
+                                  apiBody[index]['imageUrl'],
+                                  width: screenWidth,
+                                  height: screenHeight * 0.3,
+                                  fit: BoxFit.cover,
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 5),
@@ -143,12 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            apiBody[index]["courseName"],
+                                            apiBody[index]["title"],
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            100.toString(),
+                                            apiBody[index]['price'],
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -163,8 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(apiBody[index]
-                                              ["courseDescription"]),
+                                          Text(apiBody[index]["description"]),
                                           Row(
                                             children: [
                                               Icon(Icons.star,

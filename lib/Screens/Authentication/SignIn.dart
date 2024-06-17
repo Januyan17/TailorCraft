@@ -44,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
       print(" sending dataaaa");
       print(data);
       print(" sending dataaaa");
-      var res = await CallApi().postData(data, 'api/auth/login');
+      var res = await CallApi().postData(data, 'api/login');
       var body = json.decode(res.body);
 
       setState(() {
@@ -55,6 +55,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
       print(body['token']);
       MySharedPreferences.instance.setStringValue("token", body['token']);
+      MySharedPreferences.instance.setStringValue("userId", body['_id']);
+
       Get.to(BottomNavigationScreen());
     } catch (e) {
       setState(() {
@@ -87,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
               Container(
                 height: screenHeight * 0.3,
                 width: screenWidth,
-                child: Image.asset("assets/images/boy.png"),
+                child: Image.asset("assets/images/test.png"),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),

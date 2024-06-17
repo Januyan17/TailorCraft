@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tailorcraft/GetXControllers/cartController.dart';
 import 'package:tailorcraft/Screens/Authentication/SignIn.dart';
 import 'package:tailorcraft/Screens/BottomNavigation/BottomNavigation.dart';
 import 'package:tailorcraft/SplashScreen/SplashScreen.dart';
@@ -38,7 +39,7 @@ class SplashScreenWrapper extends StatelessWidget {
       future: _checkIfLoggedIn(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SplashScreen();
+          return SignInScreen();
         } else {
           if (snapshot.data == true) {
             return BottomNavigationScreen();
